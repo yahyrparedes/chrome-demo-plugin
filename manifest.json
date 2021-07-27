@@ -1,1 +1,16 @@
+{
+  "manifest_version": 2,
 
+  "name": "Fidel Demo Plugin",
+  "description": "This is an extension just for demonstration purposes",
+  "version": "1.0",
+
+  "browser_action": {
+   "default_icon": "icon.png",
+   "default_popup": "popup.html"
+  },
+  "permissions": [
+    "tabs",
+    "activeTab"
+   ]
+}
