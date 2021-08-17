@@ -1,91 +1,190 @@
-chrome.tabs.onActivated.addListener(function(info) {
+// Sites our partners
+const partners = [
+    'https://hannahs.company.site',
+    'https://unnostore.com',
+    'https://www.perfezione-lingerie.com',
+    'https://www.nathaliebird.pe',
+    'https://unnostore.com',
+    'https://hannahs.company.site',
+    'https://www.corionica.co',
+    'https://corionica.com'
+]
 
-    function getParameterByName(queryString, name) {
-        // Escape special RegExp characters
-        name = name.replace(/[[^$.|?*+(){}\\]/g, '\\$&');
-        // Create Regular expression
-        var regex = new RegExp("(?:[?&]|^)" + name + "=([^&#]*)");
-        // Attempt to get a match
-        var results = regex.exec(queryString);
+// Sites paths our partners
+const partnersPath = [
+    'checkouts',
+    'payments'
+]
 
-        return decodeURIComponent(results[1].replace(/\+/g, " ")) || '';
-    }
+//Query params [keys]
+const uui = "fidel_uuid";
 
-    var global_uuid = ""
-    var global_amount = ""
+// Global varibles
+var global_uuid = null
 
 
-    var tab = chrome.tabs.get(info.tabId, function(tab) {
+chrome.tabs.onActivated.addListener(function (info) {
+    console.log("onActivated", info)
 
-        
+    var global_ambrowsingDataount = ""
 
-        // If url startWith partners website
-        var partners = [
-            "https://hannahs.company.site",
-            "https://unnostore.com",
-            "https://www.perfezione-lingerie.com",
-            "https://www.nathaliebird.pe",
-            "https://unnostore.com",
-            "https://hannahs.company.site",
-            "https://www.corionica.co"
-        ]
+    chrome.tabs.get(info.tabId, function (tab) {
+        var url = new URL(tab.url);
+        // console.log(url.origin)
 
-        for (var i = 0; i < partners.length; i++) {
-            if (tab.url.indexOf(partners[i]) > -1) {
-                //chrome.tabs.executeScript(tab.id, {file: "background.js"});
-                console.log(tab.url);
+        partners.forEach(value => {
+            console.log("DOMAIN => ", value)
+            // Validate domain need scan
+            if (value === url.origin) {
+                console.log("Domain is valid => ", value)
 
-                let field="fidel_uuid";
+                var uuid_value = url.searchParams.get(uui)
+                global_uuid = uuid_value
 
-                if(tab.url.indexOf('?' + field + '=') != -1) {
-                    
-                    console.log("Fidel UUID Detected");
-                    var queryString = /\?[^#]+(?=#|$)|$/.exec(tab.url)[0];
-                    var uuid = getParameterByName(queryString, 'fidel_uuid');
+                console.log("uui => ", global_uuid)
+                if (global_uuid != null) {
+                    console.log("Value UUID Detected")
 
-                    global_uuid = uuid;
- 
-                    chrome.tabs.executeScript(tab.id, {file: "start_thread.js"});
-                    
-
-                    // chrome.storage.local.set({threads: "value"}, function() {
-                    //     console.log('Start a new buying thread ' + value);
-                    // });
-                      
-                    //chrome.tabs.executeScript(tab.id, {file: "background.js"});
-
+                    var config = {
+                        uuid: uuid_value,
+                        tab: tab.id,
+                    };
+                    chrome.tabs.executeScript(tab.id, {
+                        code: 'var settings = ' + JSON.stringify(config)
+                    }, function () {
+                        chrome.tabs.executeScript(tab.id, {file: 'explore_dom.js'});
+                    });
                 }
-
-                if (tab.url.indexOf('finalizar-compra') != -1) {
-                    if (tab.url.indexOf('finalizar-compra/order-received/') != -1) {
-                        
-                        chrome.tabs.executeScript(tab.id, {
-                            code: 'var fidel_uuid = ' + global_uuid + '; console.log(fidel_uuid);'
-                        }, function(results) {
-                            chrome.tabs.executeScript(tab.id, {file: "final_step.js"});
-                        });
-                        console.log("Compra finalizada!")
-                    } else {
-                        console.log("Checkout Detected");
-                        
-                        chrome.tabs.executeScript(tab.id, {
-                            code: 'var fidel_uuid = ' + global_uuid + '; console.log(fidel_uuid);'
-                        }, function(results) {
-                            chrome.tabs.executeScript(tab.id, {file: "explore_dom.js"});
-                        });
-                        
-                    }
-                    
-                    //chrome.tabs.executeScript(tab.id, {file: "background.js"});
-                }
-
-                
-
             }
-        }
-
-
-
-        
-    });
+        })
+    })
 });
+
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+        console.log("onUpdated")
+        // console.log('tabId', tabId)
+        // console.log('changeInfo', changeInfo.status)
+        // console.log('tab', tab)
+
+        if (changeInfo.status === 'complete') {
+            console.log(tab)
+            chrome.tabs.get(tabId, function (tab) {
+                var url = new URL(tab.url);
+                console.log(url.origin)
+
+                partners.forEach(domain => {
+                    // console.log("DOMAIN => ", domain)
+                    // Validate domain need scan
+                    if (domain === url.origin) {
+                        console.log("Domain is valid => ", domain)
+
+                        console.log(url.pathname)
+                        var path = url.pathname.toLowerCase()
+
+                        partnersPath.forEach(value => {
+                            if (path.indexOf(value.toLowerCase()) > -1) {
+                                console.log('coincidencia', path.indexOf(value))
+
+                                var config = {
+                                    uuid: global_uuid,
+                                    tab: tab.id,
+                                };
+                                chrome.tabs.executeScript(tab.id, {
+                                    code: 'var settings = ' + JSON.stringify(config)
+                                }, function () {
+                                    chrome.tabs.executeScript(tab.id, {file: 'explore_dom.js'});
+                                });
+                            }
+                        })
+                    }
+                })
+            })
+        } else if (changeInfo.status === 'loading') {
+            console.log('Loading!')
+        } else {
+            console.log('Pending!')
+        }
+    }
+)
+;
+
+// chrome.tabs.onActivated.addListener(function (info) {
+//
+//     function getParameterByName(queryString, name) {
+//         // Escape special RegExp characters
+//         name = name.replace(/[[^$.|?*+(){}\\]/g, '\\$&');
+//         // Create Regular expression
+//         var regex = new RegExp("(?:[?&]|^)" + name + "=([^&#]*)");
+//         // Attempt to get a match
+//         var results = regex.exec(queryString);
+//         return decodeURIComponent(results[1].replace(/\+/g, " ")) || '';
+//     }
+//
+//     var global_uuid = ""
+//     var global_ambrowsingDataount = ""
+//
+//     var tab = chrome.tabs.get(info.tabId, function (tab) {
+//         // If url startWith partners website
+//         var partners = [
+//             "https://hannahs.company.site",
+//             "https://unnostore.com",
+//             "https://www.perfezione-lingerie.com",
+//             "https://www.nathaliebird.pe",
+//             "https://unnostore.com",
+//             "https://hannahs.company.site",
+//             "https://www.corionica.co",
+//             "https://corionica.com"
+//         ]
+//         console.log(tab)
+//         for (var i = 0; i < partners.length; i++) {
+//             if (tab.url.indexOf(partners[i]) > -1) {
+//                 //chrome.tabs.executeScript(tab.id, {file: "background.js"});
+//                 let field = "fidel_uuid";
+//                 if (tab.url.indexOf('?' + field + '=') != -1) {
+//
+//                     console.log("Fidel UUID Detected");
+//                     var queryString = /\?[^#]+(?=#|$)|$/.exec(tab.url)[0];
+//                     var uuid = getParameterByName(queryString, 'fidel_uuid');
+//                     console.log(uuid)
+//                     global_uuid = uuid;
+//
+//                     chrome.tabs.executeScript(tab.id, {file: "start_thread.js"});
+//
+//
+//                     // chrome.storage.local.set({threads: "value"}, function() {
+//                     //     console.log('Start a new buying thread ' + value);
+//                     // });
+//
+//                     //chrome.tabs.executeScript(tab.id, {file: "background.js"});
+//
+//                 }
+//
+//                 if (tab.url.indexOf('finalizar-compra') != -1) {
+//                     if (tab.url.indexOf('finalizar-compra/order-received/') != -1) {
+//
+//                         chrome.tabs.executeScript(tab.id, {
+//                             code: 'var fidel_uuid = ' + global_uuid + '; console.log(fidel_uuid);'
+//                         }, function (results) {
+//                             chrome.tabs.executeScript(tab.id, {file: "final_step.js"});
+//                         });
+//                         console.log("Compra finalizada!")
+//                     } else {
+//                         console.log("Checkout Detected");
+//
+//                         chrome.tabs.executeScript(tab.id, {
+//                             code: 'var fidel_uuid = ' + global_uuid + '; console.log(fidel_uuid);'
+//                         }, function (results) {
+//                             chrome.tabs.executeScript(tab.id, {file: "explore_dom.js"});
+//                         });
+//                     }
+//
+//                     //chrome.tabs.executeScript(tab.id, {file: "background.js"});
+//                 }
+//             }
+//         }
+//
+//
+//     });
+// });
