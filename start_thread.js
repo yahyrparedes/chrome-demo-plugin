@@ -26,18 +26,17 @@ function run(settings) {
     // uuid - tab
     console.log("start thread", settings)
 
-    localStorage.clear()
     var uuid_storage = localStorage.getItem(key_uuid) || null
     if (uuid_storage == null) {
         localStorage.setItem(key_status, "[created]")
-        localStorage.setItem(key_uuid, settings.uuid)
+        // localStorage.setItem(key_uuid, settings.uuid)
         localStorage.setItem(key_uuid_value, settings.uuid_value)
-        localStorage.setItem(key_tab, settings.tab)
-        localStorage.setItem(key_domain, settings.domain)
-        localStorage.setItem(key_path, settings.path)
+        // localStorage.setItem(key_tab, settings.tab)
+        // localStorage.setItem(key_domain, settings.domain)
+        // localStorage.setItem(key_path, settings.path)
         sendParams({
             meta_1: JSON.stringify({
-                key_status: "created",
+                key_status: "[created]",
                 key_uuid: settings.uuid,
                 key_uuid_value: settings.uuid_value,
                 key_tab: settings.tab,
@@ -46,6 +45,7 @@ function run(settings) {
             })
         }).then((data) => {
             localStorage.setItem(key_db_uuid, data.uuid)
+            console.log('Success Created!')
         })
     }
     console.log(localStorage)

@@ -93,6 +93,25 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                         console.log(url.pathname)
                         var path = url.pathname.toLowerCase()
 
+                        // First this validation url for keyword checkout duplicate
+                        congratsPartnersPath.forEach(value => {
+                            if (path.indexOf(value.toLowerCase()) > -1) {
+                                console.log('coincidencia', path.indexOf(value))
+
+                                var config = {
+                                    uuid: global_uuid,
+                                    tab: tab.id,
+                                    domain: domain,
+                                    path: path
+                                };
+                                chrome.tabs.executeScript(tab.id, {
+                                    code: 'var settings = ' + JSON.stringify(config)
+                                }, function () {
+                                    chrome.tabs.executeScript(tab.id, {file: 'final_step.js'});
+                                });
+                            }
+                        })
+
                         checkoutPartnersPath.forEach(value => {
                             if (path.indexOf(value.toLowerCase()) > -1) {
                                 console.log('coincidencia', path.indexOf(value))
@@ -111,23 +130,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                             }
                         })
 
-                        congratsPartnersPath.forEach(value => {
-                            if (path.indexOf(value.toLowerCase()) > -1) {
-                                console.log('coincidencia', path.indexOf(value))
 
-                                var config = {
-                                    uuid: global_uuid,
-                                    tab: tab.id,
-                                    domain: domain,
-                                    path: path
-                                };
-                                chrome.tabs.executeScript(tab.id, {
-                                    code: 'var settings = ' + JSON.stringify(config)
-                                }, function () {
-                                    chrome.tabs.executeScript(tab.id, {file: 'final_step.js'});
-                                });
-                            }
-                        })
                     }
                 })
             })
@@ -138,7 +141,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         }
     }
 )
-;
 
 // chrome.tabs.onActivated.addListener(function (info) {
 //
