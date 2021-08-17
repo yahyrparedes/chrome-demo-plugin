@@ -20,18 +20,18 @@ function run(settings) {
     var price = body.querySelector(query_selector_price).innerHTML
     var form = body.querySelector(query_selector_form)
     console.log("Precio total detectado: " + price);
+    console.log(form);
 
-    var uuid_storage = localStorage.getItem(base_path + uuid) || null
-    if (uuid_storage == null) {
+    // var uuid_storage = localStorage.getItem(base_path + uuid) || null
+    // if (uuid_storage == null) {
         localStorage.setItem(key_uuid + uuid, ["created"])
         localStorage.setItem(key_tab + tab, tab)
         localStorage.setItem(key_domain + domain, domain)
         localStorage.setItem(key_path + path, path)
-    }
+    // }
     console.log(localStorage)
 
     uuid_storage.push("price detected " + price);
-
 }
 
 // Execute

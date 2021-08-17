@@ -24,6 +24,6 @@ function run(settings) {
     // }
     console.log(localStorage)
 }
-
+// Execute
 run(settings)
 

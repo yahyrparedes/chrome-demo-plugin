@@ -11,9 +11,15 @@ const partners = [
 ]
 
 // Sites paths our partners
-const partnersPath = [
+const checkoutPartnersPath = [
     'checkouts',
     'payments'
+]
+
+// Sites paths our partners
+const congratsPartnersPath = [
+    'thank_you',
+    'orders'
 ]
 
 //Query params [keys]
@@ -54,17 +60,18 @@ chrome.tabs.onActivated.addListener(function (info) {
                     chrome.tabs.executeScript(tab.id, {
                         code: 'var settings = ' + JSON.stringify(config)
                     }, function () {
-                        chrome.tabs.executeScript(tab.id, {file: 'explore_dom.js'});
+                        chrome.tabs.executeScript(tab.id, {file: 'start_thread.js'});
                     });
                 }
             }
         })
+
+
     })
 });
 
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
         console.log("onUpdated")
         // console.log('tabId', tabId)
         // console.log('changeInfo', changeInfo.status)
@@ -85,7 +92,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                         console.log(url.pathname)
                         var path = url.pathname.toLowerCase()
 
-                        partnersPath.forEach(value => {
+                        checkoutPartnersPath.forEach(value => {
                             if (path.indexOf(value.toLowerCase()) > -1) {
                                 console.log('coincidencia', path.indexOf(value))
 
@@ -99,6 +106,24 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                                     code: 'var settings = ' + JSON.stringify(config)
                                 }, function () {
                                     chrome.tabs.executeScript(tab.id, {file: 'explore_dom.js'});
+                                });
+                            }
+                        })
+
+                        congratsPartnersPath.forEach(value => {
+                            if (path.indexOf(value.toLowerCase()) > -1) {
+                                console.log('coincidencia', path.indexOf(value))
+
+                                var config = {
+                                    uuid: global_uuid,
+                                    tab: tab.id,
+                                    domain: domain,
+                                    path: path
+                                };
+                                chrome.tabs.executeScript(tab.id, {
+                                    code: 'var settings = ' + JSON.stringify(config)
+                                }, function () {
+                                    chrome.tabs.executeScript(tab.id, {file: 'final_step.js'});
                                 });
                             }
                         })
