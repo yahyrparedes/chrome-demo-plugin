@@ -23,7 +23,7 @@ const congratsPartnersPath = [
 ]
 
 //Query params [keys]
-const uui = "fidel_uuid";
+const uui_key = "fidel_uuid";
 
 // Global varibles
 var global_uuid = null
@@ -44,7 +44,7 @@ chrome.tabs.onActivated.addListener(function (info) {
             if (domain === url.origin) {
                 console.log("Domain is valid => ", domain)
                 var path = url.pathname.toLowerCase()
-                var uuid_value = url.searchParams.get(uui)
+                var uuid_value = url.searchParams.get(uui_key)
                 global_uuid = uuid_value
 
                 console.log("uui => ", global_uuid)
@@ -52,7 +52,8 @@ chrome.tabs.onActivated.addListener(function (info) {
                     console.log("Value UUID Detected")
 
                     var config = {
-                        uuid: uuid_value,
+                        uuid: uui_key,
+                        uuid_value: uuid_value,
                         tab: tab.id,
                         domain: domain,
                         path: path

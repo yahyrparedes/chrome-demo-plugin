@@ -28,6 +28,9 @@ function run(settings) {
         localStorage.setItem(key_tab + tab, tab)
         localStorage.setItem(key_domain + domain, domain)
         localStorage.setItem(key_path + path, path)
+
+        fetch()
+
     // }
     console.log(localStorage)
 
