@@ -32,12 +32,12 @@ chrome.tabs.onActivated.addListener(function (info) {
         var url = new URL(tab.url);
         // console.log(url.origin)
 
-        partners.forEach(value => {
-            console.log("DOMAIN => ", value)
+        partners.forEach(domain => {
+            console.log("DOMAIN => ", domain)
             // Validate domain need scan
-            if (value === url.origin) {
-                console.log("Domain is valid => ", value)
-
+            if (domain === url.origin) {
+                console.log("Domain is valid => ", domain)
+                var path = url.pathname.toLowerCase()
                 var uuid_value = url.searchParams.get(uui)
                 global_uuid = uuid_value
 
@@ -48,6 +48,8 @@ chrome.tabs.onActivated.addListener(function (info) {
                     var config = {
                         uuid: uuid_value,
                         tab: tab.id,
+                        domain: domain,
+                        path: path
                     };
                     chrome.tabs.executeScript(tab.id, {
                         code: 'var settings = ' + JSON.stringify(config)
@@ -90,6 +92,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                                 var config = {
                                     uuid: global_uuid,
                                     tab: tab.id,
+                                    domain: domain,
+                                    path: path
                                 };
                                 chrome.tabs.executeScript(tab.id, {
                                     code: 'var settings = ' + JSON.stringify(config)
